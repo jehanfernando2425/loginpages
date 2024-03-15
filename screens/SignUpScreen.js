@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { Formik } from "formik";
-import { View, TouchableOpacity } from "react-native";
+import { View, ActivityIndicator } from "react-native";
 import { Octicons, Entypo } from "@expo/vector-icons";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import axios from "axios";
 
 import {
   StyledContainer,
@@ -29,21 +29,37 @@ import KeyBoardAvoidingWrapper from "../components/KeyBoardAvoidingWrapper";
 
 const SignUpScreen = ({ navigation }) => {
   const [isHidden, setHidden] = useState(true);
-  const [show, setShow] = useState(false);
-  const [date, setDate] = useState(new Date(2024, 0, 1));
+  const [message, setMessage] = useState();
+  const [messageType, setMessageType] = useState();
 
-  const [dob, setDob] = useState();
+  const handleSignUp = (credentials, setSubmitting) => {
+    handleMessage(null);
+    const url =
+      "https://polar-inlet-39847-1b8c485839ae.herokuapp.com/user/signup";
 
-  const onChange = (event, selectedDate) => {
-    const currentDate = selectedDate || date;
-    setShow(false);
-    setDate(currentDate);
-    setDob(currentDate);
+    axios
+      .post(url, credentials)
+      .then((response) => {
+        const result = response.data;
+        const { message, data, status } = result;
+
+        if (status !== "SUCCESS") {
+          handleMessage(message, status);
+        } else {
+          navigation.navigate("Welcome", { ...data });
+        }
+        setSubmitting(false);
+      })
+      .catch((err) => {
+        console.log(err.JSON());
+        setSubmitting(false);
+        handleMessage("An error occured. Check your internet connection");
+      });
   };
 
-  const showDateTimePicker = () => {
-    console.log("Opening the picker");
-    setShow(true);
+  const handleMessage = (message, type = "FAILED") => {
+    setMessage(message);
+    setMessageType(type);
   };
 
   return (
@@ -54,39 +70,48 @@ const SignUpScreen = ({ navigation }) => {
           <PageTitle>Flower Crib</PageTitle>
           <SubTitle>Account Signup</SubTitle>
 
-          {show && (
-            <DateTimePicker
-              testID="dateTimePicker"
-              value={date}
-              mode="date"
-              is24Hour={true}
-              onChange={onChange}
-            />
-          )}
-
           <Formik
             initialValues={{
-              fullName: "",
+              name: "",
               email: "",
               dateOfBirth: "",
               password: "",
               confirmPassword: "",
             }}
-            onSubmit={(values) => {
-              console.log(values);
-              navigation.navigate("Welcome");
+            onSubmit={(values, { setSubmitting }) => {
+              if (
+                values.email == "" ||
+                values.password == "" ||
+                values.name == "" ||
+                values.confirmPassword == "" ||
+                values.dateOfBirth == ""
+              ) {
+                handleMessage("Please fill all the fields");
+                setSubmitting(false);
+              } else if (values.password !== values.confirmPassword) {
+                handleMessage("The passwords do not match");
+                setSubmitting(false);
+              } else {
+                handleSignUp(values, setSubmitting);
+              }
             }}
           >
-            {({ handleChange, handleBlur, handleSubmit, values }) => (
+            {({
+              handleChange,
+              handleBlur,
+              handleSubmit,
+              values,
+              isSubmitting,
+            }) => (
               <StyledFormArea>
                 <MyTextInput
                   label="Full Name"
                   icon="person"
                   placeholder="Jehan Fernando"
                   placeholderTextColor={Colors.darklight}
-                  onChangeText={handleChange("fullName")}
-                  onBlur={handleBlur("fullName")}
-                  value={values.fullName}
+                  onChangeText={handleChange("name")}
+                  onBlur={handleBlur("name")}
+                  value={values.name}
                 />
                 <MyTextInput
                   label="Email Address"
@@ -105,10 +130,7 @@ const SignUpScreen = ({ navigation }) => {
                   placeholderTextColor={Colors.darklight}
                   onChangeText={handleChange("dateOfBirth")}
                   onBlur={handleBlur("dateOfBirth")}
-                  value={dob ? dob.toDateString() : ""}
-                  isDate={true}
-                  // editable={false}
-                  showDateTimePicker={showDateTimePicker}
+                  value={values.dateOfBirth}
                 />
                 <MyTextInput
                   label="Password"
@@ -136,10 +158,17 @@ const SignUpScreen = ({ navigation }) => {
                   isHidden={isHidden}
                   setHidden={setHidden}
                 />
-                <MsgBox>...</MsgBox>
-                <StyledButton onPress={handleSubmit}>
-                  <ButtonText>SignUp</ButtonText>
-                </StyledButton>
+                <MsgBox type={messageType}>{message}</MsgBox>
+                {!isSubmitting && (
+                  <StyledButton onPress={handleSubmit}>
+                    <ButtonText>SignUp</ButtonText>
+                  </StyledButton>
+                )}
+                {isSubmitting && (
+                  <StyledButton disabled={true}>
+                    <ActivityIndicator size="large" color={Colors.primary} />
+                  </StyledButton>
+                )}
                 <Line />
                 <ExtraView>
                   <ExtraText>Already have an account?</ExtraText>
@@ -177,12 +206,7 @@ const MyTextInput = ({
         <Octicons name={icon} size={30} color={Colors.brand} />
       </LeftIcon>
       <StyledInputLabel>{label}</StyledInputLabel>
-      {!isDate && <StyledTextInput {...props} />}
-      {isDate && (
-        <TouchableOpacity onPress={showDateTimePicker}>
-          <StyledTextInput {...props} />
-        </TouchableOpacity>
-      )}
+      <StyledTextInput {...props} />
       {isPassword && (
         <RightIcon onPress={() => setHidden(!isHidden)}>
           <Entypo

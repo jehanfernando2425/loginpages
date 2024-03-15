@@ -5,7 +5,6 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import LoginScreen from "../screens/LoginScreen";
 import SignUpScreen from "../screens/SignUpScreen";
 import WelcomeScreen from "../screens/WelcomeScreen";
-import { Colors } from "../components/styles";
 
 const Stack = createNativeStackNavigator();
 

@@ -12,16 +12,16 @@ import {
   WelcomeContainer,
 } from "../components/styles";
 
-const WelcomeScreen = ({ navigation }) => {
+const WelcomeScreen = ({ navigation, route }) => {
+  const result = route.params;
   return (
     <>
       <StatusBar style="dark" />
       <InnerContainer>
         <WelcomeContainer>
           <PageTitle>Welcome!!!</PageTitle>
-          <SubTitle>Jehan Fernando</SubTitle>
-          <SubTitle>jehan.20220786@iit.ac.lk</SubTitle>
-
+          <SubTitle>{result.name}</SubTitle>
+          <SubTitle>{result.email}</SubTitle>
           <StyledFormArea>
             <Line />
             <StyledButton
