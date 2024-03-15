@@ -108,37 +108,6 @@ const LoginScreen = ({ navigation }) => {
     setMessageType(type);
   };
 
-  // const handleGoogleSignIn = () => {
-  //   setGoogleSignIn(true);
-  //   const config = {
-  //     iOSClientID: `201770894009-0rcjnu1k353old9695ckehcba4cpjd27.apps.googleusercontent.com`,
-  //     androidClientID: `201770894009-k8ntpgp8pfc3s0lfbo6gs3gm4g8vdf58.apps.googleusercontent.com`,
-  //     scopes: ["profile", "email"],
-  //   };
-
-  //   Google.logInAsync(config)
-  //     .then((result) => {
-  //       const { type, user } = result;
-
-  //       if (type == "success") {
-  //         const { email, name, photoUrl } = user;
-  //         handleMessage("Google Signin successful", "SUCCESS");
-  //         setTimeout(
-  //           () => navigation.navigate("Welcome", { email, name, photoUrl }),
-  //           1000
-  //         );
-  //       }
-  //       setGoogleSignIn(false);
-  //     })
-  //     .catch((err) => {
-  //       console.log(err);
-  //       handleMessage(
-  //         "An error occured. Check your internet connection and try again"
-  //       );
-  //       setGoogleSignIn(false);
-  //     });
-  // };
-
   return (
     <KeyBoardAvoidingWrapper>
       <StyledContainer>
